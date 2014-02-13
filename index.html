@@ -10,7 +10,8 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <title>Jsgameoflife by RLuckom</title>
+    <script src="javascripts/gameOfLife.js"></script>
+    <title>jsGameOfLife by RLuckom</title>
   </head>
 
   <body>
@@ -18,7 +19,7 @@
       <div class="inner">
 
         <header>
-          <h1>Jsgameoflife</h1>
+          <h1>jsGameOfLife</h1>
           <h2>Interactive Javascript implementation of Conway&#39;s Game Of Life</h2>
         </header>
 
@@ -36,6 +37,9 @@
 <p>Using jQuery UI / mobile to add responsive / customizable UI features.</p>
 
 <p>Possibly "solitaire" mode, with challenges (clear the board with fewer than X toggles, etc.)</p>
+<p>Mouse over the grid and click squares to toggle. Mouse out to start the game. Mouse back over to pause and toggle squares.</p>
+<div id="GOL" style="margin: 0 auto;">
+</div>
         </section>
 
         <footer>
@@ -46,5 +50,11 @@
         
       </div>
     </div>
+    <script type="text/javascript">
+    	var goElement = document.getElementById('GOL');
+    	var gol = new GameOfLife(500, 500, 50, 50);
+    	gol.svg.setAttribute("style", 'margin: 0 auto; display: block;');
+    	goElement.appendChild(gol.svg);
+    </script>
   </body>
 </html>
