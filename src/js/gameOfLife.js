@@ -1,29 +1,34 @@
-function GameOfLife (world_map) {
-	this.mapArray = world_map.worldMap;
-}
+/**
+ * Creates a game of life svg.
+ * 
+ * @param {int} pixelWidth - width of svg on page.
+ * @param {int} pixelHeight - height of svg on page.
+ * @param {int} unitWidth - number of squares across.
+ * @param {int} unitHeight - number of squares high.
+ */
 
-function GameOfLife(screenWidth, screenHeight, unitWidth, unitHeight) {
+function GameOfLife(pixelWidth, pixelHeight, unitWidth, unitHeight) {
 	//Clockwise from 12 o'clock
 	this.dx = [0, 1, 1, 1, 0, -1, -1, -1];
 	this.dy = [-1, -1, 0, 1, 1, 1, 0, -1];
-	this.screenWidth = screenWidth;
-	this.screenHeight = screenHeight;
+	this.pixelWidth = pixelWidth;
+	this.pixelHeight = pixelHeight;
 	this.unitWidth = unitWidth;
 	this.unitHeight = unitHeight;
-	this.squareWidth = screenWidth / unitWidth;
-	this.squareHeight = screenHeight / unitHeight;
+	this.squareWidth = pixelWidth / unitWidth;
+	this.squareHeight = pixelHeight / unitHeight;
 	this.liveColor = 'black';
 	this.deadColor = 'white';
 	this.svgns = "http://www.w3.org/2000/svg";
 	this.svg = document.createElementNS(this.svgns, "svg:svg");
-	this.svg.setAttribute('height', screenHeight);
-	this.svg.setAttribute('width', screenWidth);
+	this.svg.setAttribute('height', pixelHeight);
+	this.svg.setAttribute('width', pixelWidth);
 	this.svg.setAttribute('stroke-width', '2px');
 	this.svg.setAttribute('stroke', 'black');
 	this.alive = 1;
 	this.dead = 0;
 	this.running = true;
-	var s ="0 0 " + screenWidth + " " + screenHeight;
+	var s ="0 0 " + pixelWidth + " " + pixelHeight;
 	this.svg.setAttribute('viewBox', s);
 	this.svg.addEventListener("mouseleave", this.makeOnMouseLeave());
 	this.svg.addEventListener("mouseenter", this.makeOnMouseEnter());
@@ -34,14 +39,15 @@ function GameOfLife(screenWidth, screenHeight, unitWidth, unitHeight) {
 
 GameOfLife.prototype = {
 	
+	/** Makes the individual GridSquare objects representing the board.*/
 	createSquares: function() {
 		var grid = [];
-		var lastY = this.screenHeight + this.squareHeight;
+		var lastY = this.pixelHeight + this.squareHeight;
 		for (n = this.squareHeight; n < lastY; n += this.squareHeight) {
 			var newRow = [];
-			for (m = 0; m < this.screenWidth; m += this.squareWidth) {
+			for (m = 0; m < this.pixelWidth; m += this.squareWidth) {
 				var x = m;
-				var y = this.screenHeight - n; 
+				var y = this.pixelHeight - n; 
 				var newSquare = new GridSquare(x, y, this);
 				newRow.push(newSquare);
 			}
@@ -50,14 +56,31 @@ GameOfLife.prototype = {
 		return grid;
 	},
 	
+	/**Sets the square at position x, y to the color color. 
+	 *
+	 * @param {int} x
+	 * @param {int} y
+	 * @param {string} color 
+	*/
 	colorSquare: function(x, y, color) {
 		this.worldMap[y][x].setColor(color);
 	},
 	
+	/**Toggles the color of square x, y between deadcolor and alivecolor.
+	 * 
+	 * @param {int} x
+	 * @param {int} y
+	 * */
 	toggleSquareColor: function(x, y) {
 		this.worldMap[y][x].toggleColor();
 	},
 	
+	/**Returns a list of x, y coordinates of the neighbors of point x, y.
+	 * 
+	 * @param {int} x
+	 * @param {int} y
+	 * @return {array} - array of [x, y] arrays.
+	*/
 	getNeighborPoints: function(x, y) {
 		var neighbors = [];
 		for (n = 0; n < this.dx.length; n ++) {
@@ -72,6 +95,14 @@ GameOfLife.prototype = {
 		return neighbors;
 	},
 	
+	/**
+	 * Returns the contents of the cells neighboring point x, y.
+	 * 
+     * @param {int} x
+     * @param {int} y
+     * @return {array} - array of the contents of the cells 
+     *                   neighboring point x, y
+	 */
 	getNeighborValues: function(x, y) {
 		var neighborPoints = this.getNeighborPoints(x, y),
 		    neighborValues = [];
@@ -82,11 +113,22 @@ GameOfLife.prototype = {
 		return neighborValues;
 	},
 
+    /**
+     * Returns the number of living neighbors cell x, y has.
+     * 
+     * @param {int} x
+     * @param {int} y
+     * @return {int} - number of living neighbors
+     */
 	getSumOfLiveNeighbors: function(x, y) {
 		return this.getNeighborValues(x, y).reduce(
 			function (n, m) {return n + m.getAliveOrDead();}, 0);
 	},
 	
+	/**
+	 * Runs one step of the GameOfLife if this.running, and sets a timeout
+	 * to run another step.
+	 */
 	runGameOfLife: function () {
 		if (!this.running) {
 			return;
@@ -108,9 +150,24 @@ GameOfLife.prototype = {
 			this.worldMap[point[1]][point[0]].toggleColor();
 		}
 		var worldMap = this;
-		window.setTimeout(function() {worldMap.runGameOfLife();}, 75);
+		window.setTimeout(worldMap.makeRunCallback(), 75);
 	},
 	
+	/**
+	 * @return {function} - no-argument function that executes 
+	 *                      this.runGameOfLife. 
+	 */
+	makeRunCallback: function () {
+		worldMap = this;
+		return function() {
+			worldMap.runGameOfLife();
+		};
+	},
+	
+	/**
+	 * @return {function} - no-argument function that sets this.running
+	 *                      to true and runs this.runGameOfLife.
+	 */
 	makeOnMouseLeave: function() {
 		worldMap = this;
 		return function() {
@@ -120,6 +177,10 @@ GameOfLife.prototype = {
 		};
 	},
 	
+	/**
+	 * @return {function} - no-argument function that sets this.running
+	 *                      to false.
+	 */
 	makeOnMouseEnter: function() {
 		worldMap = this;
 		return function() {
@@ -127,6 +188,14 @@ GameOfLife.prototype = {
 		};
 	},
 	
+	/**
+	 * Given the cellState and numLivingNeighbors, returns this.alive 
+	 * or this.dead.
+	 *  
+     * @param {int} cellState
+     * @param {int} numLivingNeighbors
+     * @return {int} - this.alive or this.dead
+	 */
 	GoLRules: function(cellState, numLivingNeighbors) {
 		//console.log(cellState, numLivingNeighbors, this.alive, this.dead);
 		if (cellState == this.alive && numLivingNeighbors < 2) {
@@ -145,6 +214,14 @@ GameOfLife.prototype = {
 	}
 };
 
+
+/**
+ * 
+ * @constructor
+ * @param {int} x - number of squares from left.
+ * @param {int} y - number of squares from bottom.
+ * @param {GameOfLife} parent - Game containing square.
+ */
 function GridSquare(x, y, parent) {
 	this.x = x;
 	this.y = y;
@@ -164,10 +241,18 @@ function GridSquare(x, y, parent) {
 
 GridSquare.prototype = {
 	
+	/** @return {string} - fill color */
 	getColor: function() {return this.svg.getAttribute('fill');},
 	
+	
+	/**
+	 * Sets fill attribute of square to color.
+	 * 
+	 * @param {string} color - color to set fill attribute. 
+	*/
 	setColor: function(color) {this.svg.setAttribute('fill', color);},
 	
+	/** @return {int} - this.alive or this.dead, depending on cell state. */
 	getAliveOrDead: function() {
 		if (this.getColor() == this.liveColor) {
 			//console.log(this.alive)
@@ -176,6 +261,10 @@ GridSquare.prototype = {
 		return this.dead;
 	},
 	
+	/**
+	 * @return {function} - toggles color between this.deadColor 
+	 *                       and this.liveColor. 
+	 */
 	svgOnClick: function() {
 		deadColor = this.deadColor;
 		liveColor = this.liveColor;
@@ -187,7 +276,8 @@ GridSquare.prototype = {
 			this.setAttribute('fill', deadColor);
 			};
 	},
-
+	
+	/** Toggles color between this.deadColor and this.liveColor. */
 	toggleColor: function() {
 		if (this.getColor() == this.deadColor) {
 			this.setColor(this.liveColor);
@@ -197,6 +287,9 @@ GridSquare.prototype = {
 	}
 };
 
+/**
+ * Sets up a GOL and appends it to the DOM. For testing only.
+ */
 function runGOL() {
 	var sGrid = new GameOfLife(800, 800, 80, 80);
 	document.body.appendChild(sGrid.svg);
