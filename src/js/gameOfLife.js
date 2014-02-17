@@ -11,6 +11,7 @@ function GameOfLife(pixelWidth, pixelHeight, unitWidth, unitHeight) {
 	//Clockwise from 12 o'clock
 	this.dx = [0, 1, 1, 1, 0, -1, -1, -1];
 	this.dy = [-1, -1, 0, 1, 1, 1, 0, -1];
+	this.waitTime = 75;
 	this.pixelWidth = pixelWidth;
 	this.pixelHeight = pixelHeight;
 	this.unitWidth = unitWidth;
@@ -19,25 +20,36 @@ function GameOfLife(pixelWidth, pixelHeight, unitWidth, unitHeight) {
 	this.squareHeight = pixelHeight / unitHeight;
 	this.liveColor = 'black';
 	this.deadColor = 'white';
-	this.svgns = "http://www.w3.org/2000/svg";
-	this.svg = document.createElementNS(this.svgns, "svg:svg");
-	this.svg.setAttribute('height', pixelHeight);
-	this.svg.setAttribute('width', pixelWidth);
-	this.svg.setAttribute('stroke-width', '2px');
-	this.svg.setAttribute('stroke', 'black');
-	this.alive = 1;
 	this.dead = 0;
+	this.alive = 1;
 	this.running = true;
-	var s ="0 0 " + pixelWidth + " " + pixelHeight;
-	this.svg.setAttribute('viewBox', s);
-	this.svg.addEventListener("mouseleave", this.makeOnMouseLeave());
-	this.svg.addEventListener("mouseenter", this.makeOnMouseEnter());
+	this.div = document.createElement('div');
+	this.div.setAttribute('style', 'position: relative;');
+	this.svgns = "http://www.w3.org/2000/svg";
+	this.svg = this.createSVG();
+	this.slider = this.createSlider();
+	this.div.appendChild(this.svg);
+	this.div.appendChild(this.slider);
 	this.worldMap = this.createSquares();
 	this.worldHeight = this.worldMap.length;
 	this.worldWidth = this.worldMap[0].length;
 }
 
 GameOfLife.prototype = {
+	
+	/** Creates SVG element for board. */
+	createSVG: function() {
+		var svg = document.createElementNS(this.svgns, "svg:svg");
+		svg.setAttribute('height', this.pixelHeight);
+	    svg.setAttribute('width', this.pixelWidth);
+	    svg.setAttribute('stroke-width', '2px');
+	    svg.setAttribute('stroke', 'black');
+	    var s ="0 0 " + this.pixelWidth + " " + this.pixelHeight;
+	    svg.setAttribute('viewBox', s);
+	    svg.addEventListener("mouseleave", this.makeOnMouseLeave());
+	    svg.addEventListener("mouseenter", this.makeOnMouseEnter());
+	    return svg;
+	},
 	
 	/** Makes the individual GridSquare objects representing the board.*/
 	createSquares: function() {
@@ -149,8 +161,7 @@ GameOfLife.prototype = {
 			var point = toggleSquares[n];
 			this.worldMap[point[1]][point[0]].toggleColor();
 		}
-		var worldMap = this;
-		window.setTimeout(worldMap.makeRunCallback(), 75);
+		window.setTimeout(this.makeRunCallback(), this.waitTime);
 	},
 	
 	/**
@@ -211,6 +222,39 @@ GameOfLife.prototype = {
 			return this.alive;
 		}
 		return this.dead;
+	},
+	
+	/** creates slider element. */
+	createSlider: function() {
+		var this_ = this;
+	    var sliderInput = document.createElement('input');
+	    sliderInput.setAttribute('type', 'text');
+	    var sliderLabel = document.createElement('label');
+	    sliderLabel.setAttribute('for', 'GoLSlider');
+	    var speedText = "Speed: " + this.waitTime / 1000 + " seconds / step";
+	    sliderLabel.textContent = speedText;
+	    var sliderSpec =  {
+			value: this_.waitTime,
+			min: 0,
+			max: 2000,
+			step: 25,
+			slide: function(event, ui) {
+				this_.waitTime = ui.value;
+				var speed = ui.value / 1000 + " seconds / step";
+				sliderLabel.textContent = "Speed: " + speed;
+			}
+		};
+		var sliderDiv = document.createElement('div');	
+		var labelPara = document.createElement('p');
+	    var slider = document.createElement('div');   
+	    $(slider).slider(sliderSpec);
+		var style = 'position: relative; display: block; width: 200px;';
+	    slider.setAttribute('style', style);
+	    slider.setAttribute('id', 'GoLSlider');
+	    labelPara.appendChild(sliderLabel);
+	    sliderDiv.appendChild(labelPara);
+	    sliderDiv.appendChild(slider);
+	    return sliderDiv;
 	}
 };
 
@@ -255,7 +299,6 @@ GridSquare.prototype = {
 	/** @return {int} - this.alive or this.dead, depending on cell state. */
 	getAliveOrDead: function() {
 		if (this.getColor() == this.liveColor) {
-			//console.log(this.alive)
 			return this.alive;
 		}
 		return this.dead;
@@ -292,5 +335,5 @@ GridSquare.prototype = {
  */
 function runGOL() {
 	var sGrid = new GameOfLife(800, 800, 80, 80);
-	document.body.appendChild(sGrid.svg);
+	document.body.appendChild(sGrid.div);
 }
