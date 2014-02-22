@@ -102,7 +102,7 @@ function GameOfLifeCanvas(width, height, lines) {
 	this.ctx.canvas.width = width;
 	this.ctx.canvas.height = height;
 	this.black = [0, 0, 0, 255];
-	this.white = [255, 255, 255, 255];
+	this.white = [255, 255, 255, 0];
 	this.alive = this.black;
 	this.dead = this.white;
 	this.lines = lines;
