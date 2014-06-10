@@ -10,7 +10,11 @@
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-    <script src="javascripts/gameOfLife.js"></script>
+    <link rel="stylesheet" type="text/css" href="http://code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+    <script src="./javascripts/gameOfLife.js"></script>
+    <script src="./javascripts/canvasgameoflife.js"></script>
     <title>jsGameOfLife by RLuckom</title>
   </head>
 
@@ -20,7 +24,7 @@
 
         <header>
           <h1>jsGameOfLife</h1>
-          <h2>Interactive Javascript implementation of Conway&#39;s Game Of Life</h2>
+          <h2>Interactive Javascript implementations of Conway&#39;s Game Of Life</h2>
         </header>
 
         <section id="downloads" class="clearfix">
@@ -32,13 +36,19 @@
         <hr>
 
         <section id="main_content">
-          <p>Upcoming:</p>
+          <h3>Canvas Version</h3>
 
-<p>Using jQuery UI / mobile to add responsive / customizable UI features.</p>
+<p>Click or touch squares to toggle them between alive and dead. Use the play / pause button to pause and unpause the game, and the slider to adjust the speed. The game autopauses when the mouse 
+is over the board.</p>
+<div id="BigSquaresCanvasGOL" style="margin: 0 auto;"></div>
+<br />
+<p>As you can see below, this version is pretty snappy even with a large number of squares</p>
+<div id="LittleSquaresCanvasGOL" style="margin: 0 auto;"></div>
+<br />
+          <h3>SVG Version</h3>
 
-<p>Possibly "solitaire" mode, with challenges (clear the board with fewer than X toggles, etc.)</p>
-<p>Mouse over the grid and click squares to toggle. Mouse out to start the game. Mouse back over to pause and toggle squares.</p>
-<div id="GOL" style="margin: 0 auto;">
+<p>This is the SVG version of the game, before I rewrote it using canvas for performance reasons. SVG is a great format, but not suited to applications with a very large number of elements. Mouse over the grid and click squares to toggle. Mouse out to start the game. Mouse back over to pause and toggle squares.</p>
+<div id="SVGGOL" style="margin: 0 auto;">
 </div>
         </section>
 
@@ -51,10 +61,14 @@
       </div>
     </div>
     <script type="text/javascript">
-    	var goElement = document.getElementById('GOL');
-    	var gol = new GameOfLife(500, 500, 50, 50);
-    	gol.svg.setAttribute("style", 'margin: 0 auto; display: block;');
-    	goElement.appendChild(gol.svg);
+    	var SVGgoElement = document.getElementById('SVGGOL');
+    	var SVGgol = new GameOfLife(500, 500, 50, 50);
+    	SVGgol.svg.setAttribute("style", 'margin: 0 auto; display: block;');
+    	SVGgoElement.appendChild(SVGgol.svg);
+        var BigSquaresGOL = new CanvasGameOfLife(400, 400, 20, 20);
+        document.getElementById('BigSquaresCanvasGOL').appendChild(BigSquaresGOL.div);
+        var LittleSquaresGOL = new CanvasGameOfLife(1000, 1000, 110, 110);
+        document.getElementById('LittleSquaresCanvasGOL').appendChild(LittleSquaresGOL.div);
     </script>
   </body>
 </html>
