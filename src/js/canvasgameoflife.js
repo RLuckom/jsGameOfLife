@@ -467,10 +467,11 @@ CanvasGameOfLife.prototype = {
     /** creates slider element. */
     createSlider: function () {
         var this_ = this;
+	var sliderID = "slider" + $('input').length;
         var sliderInput = document.createElement('input');
         sliderInput.setAttribute('type', 'text');
         var sliderLabel = document.createElement('label');
-        sliderLabel.setAttribute('for', 'GoLSlider');
+        sliderLabel.setAttribute('for', sliderID);
         var speedText = "Speed: " + this.waitTime / 1000 + " seconds / step";
         sliderLabel.textContent = speedText;
         var sliderSpec =  {
@@ -490,7 +491,7 @@ CanvasGameOfLife.prototype = {
         $(slider).slider(sliderSpec);
         var style = 'position: static; display: inline-block; width: 200px;';
         sliderDiv.setAttribute('style', style);
-        slider.setAttribute('id', 'GoLSlider');
+        slider.setAttribute('id', sliderID);
         labelPara.appendChild(sliderLabel);
         sliderDiv.appendChild(labelPara);
         sliderDiv.appendChild(slider);
@@ -505,8 +506,9 @@ CanvasGameOfLife.prototype = {
 
         button.setAttribute("type", "checkbox");
         pauseButtonDiv.setAttribute('style', style);
-        button.setAttribute("id", "pauseButton");
-        label.setAttribute('for', "pauseButton");
+	var pauseID = "pauseButton" + $('input').length;
+        button.setAttribute("id", pauseID);
+        label.setAttribute('for', pauseID);
         label.textContent = "Play";
         var this_ = this;
         $(button).change(function () {
