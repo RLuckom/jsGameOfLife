@@ -199,8 +199,8 @@ GameOfLifeCanvas.prototype = {
             square = squares[n];
             square.color = square.alive ? this.alive : this.dead;
             this.drawSquare(square);
-            //this.drawLines(this.lines);
         }
+        this.drawLines(this.lines);
     }
 };
 
